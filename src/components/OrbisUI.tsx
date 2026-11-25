@@ -4,31 +4,48 @@ import { apiFetch } from '../lib/api';
 import { useApp } from '../context/AppContext';
 import type { User } from '../types';
 
+const ORBIS_LOGO_SRC = '/src/assets/images/orbis_brand_logo_1795641054902.jpg';
+
 export function OrbisLogo({ size = 32, showText = true }: { size?: number; showText?: boolean }) {
+  const [imgFailed, setImgFailed] = useState(false);
+
   return (
     <div className="flex items-center gap-2.5 select-none whitespace-nowrap shrink-0">
-      <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <defs>
-          <linearGradient id="orbisBrandGrad" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#4F46E5" />
-            <stop offset="0.6" stopColor="#E11D48" />
-            <stop offset="1" stopColor="#F59E0B" />
-          </linearGradient>
-        </defs>
-        <rect width="40" height="40" rx="11" fill="url(#orbisBrandGrad)" />
-        <circle cx="20" cy="20" r="10" stroke="white" strokeWidth="2.4" />
-        <ellipse
-          cx="20"
-          cy="20"
-          rx="14.5"
-          ry="5.2"
-          transform="rotate(-26 20 20)"
-          stroke="white"
-          strokeWidth="2"
-          strokeOpacity="0.92"
+      {!imgFailed ? (
+        <img
+          src={ORBIS_LOGO_SRC}
+          alt="Orbis"
+          width={size}
+          height={size}
+          referrerPolicy="no-referrer"
+          onError={() => setImgFailed(true)}
+          style={{ width: size, height: size }}
+          className="rounded-xl object-cover ring-1 ring-zinc-900/15 shadow-sm dark:ring-white/15 shrink-0"
         />
-        <circle cx="28.5" cy="11.5" r="2.2" fill="white" />
-      </svg>
+      ) : (
+        <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="orbisBrandGrad" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#4F46E5" />
+              <stop offset="0.6" stopColor="#E11D48" />
+              <stop offset="1" stopColor="#F59E0B" />
+            </linearGradient>
+          </defs>
+          <rect width="40" height="40" rx="11" fill="url(#orbisBrandGrad)" />
+          <circle cx="20" cy="20" r="10" stroke="white" strokeWidth="2.4" />
+          <ellipse
+            cx="20"
+            cy="20"
+            rx="14.5"
+            ry="5.2"
+            transform="rotate(-26 20 20)"
+            stroke="white"
+            strokeWidth="2"
+            strokeOpacity="0.92"
+          />
+          <circle cx="28.5" cy="11.5" r="2.2" fill="white" />
+        </svg>
+      )}
       {showText && (
         <span className="font-display text-xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
           Orbis
@@ -114,7 +131,7 @@ export function Avatar({
         />
       ) : (
         <div
-          className={`${dims} rounded-full bg-indigo-600 text-white font-semibold flex items-center justify-center`}
+          className={`${dims} rounded-full bg-gradient-to-br from-zinc-900 via-indigo-900 to-rose-700 text-amber-200 font-display font-bold flex items-center justify-center ring-1 ring-amber-400/30`}
         >
           {name.slice(0, 1).toUpperCase()}
         </div>

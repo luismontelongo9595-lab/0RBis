@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import {
   Home,
   Film,
@@ -16,21 +16,51 @@ import {
   Search,
   Hash,
   User as UserIcon,
+  Loader2,
 } from 'lucide-react';
 import { AppProvider, useApp, type NavTab } from './context/AppContext';
 import { apiFetch } from './lib/api';
 import type { User } from './types';
 import { AuthModal, Avatar, OrbisLogo, VerifiedBadge } from './components/OrbisUI';
 import { FeedView } from './components/FeedView';
-import { ReelsView } from './components/ReelsView';
-import { ExploreView } from './components/ExploreView';
-import { CommunitiesView } from './components/CommunitiesView';
-import { MessagesView } from './components/MessagesView';
-import { NotificationsView } from './components/NotificationsView';
-import { ProfileView } from './components/ProfileView';
-import { SettingsView } from './components/SettingsView';
-import { CreatorStudioView } from './components/CreatorStudioView';
-import { AdminView } from './components/AdminView';
+import { OfflineIndicator } from './components/OfflineIndicator';
+import { PWAInstallButton } from './components/PWAInstallButton';
+
+const ReelsView = lazy(() =>
+  import('./components/ReelsView').then((m) => ({ default: m.ReelsView }))
+);
+const ExploreView = lazy(() =>
+  import('./components/ExploreView').then((m) => ({ default: m.ExploreView }))
+);
+const CommunitiesView = lazy(() =>
+  import('./components/CommunitiesView').then((m) => ({ default: m.CommunitiesView }))
+);
+const MessagesView = lazy(() =>
+  import('./components/MessagesView').then((m) => ({ default: m.MessagesView }))
+);
+const NotificationsView = lazy(() =>
+  import('./components/NotificationsView').then((m) => ({ default: m.NotificationsView }))
+);
+const ProfileView = lazy(() =>
+  import('./components/ProfileView').then((m) => ({ default: m.ProfileView }))
+);
+const SettingsView = lazy(() =>
+  import('./components/SettingsView').then((m) => ({ default: m.SettingsView }))
+);
+const CreatorStudioView = lazy(() =>
+  import('./components/CreatorStudioView').then((m) => ({ default: m.CreatorStudioView }))
+);
+const AdminView = lazy(() =>
+  import('./components/AdminView').then((m) => ({ default: m.AdminView }))
+);
+
+function ViewLoader() {
+  return (
+    <div className="flex min-h-[240px] items-center justify-center">
+      <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+    </div>
+  );
+}
 
 function OrbisShell() {
   const {
@@ -69,12 +99,8 @@ function OrbisShell() {
     { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadMessages },
     { id: 'notifications', label: 'Notifications', icon: Bell, badge: unreadNotifications },
     { id: 'creator', label: 'Creator Studio', icon: Sparkles },
-    ...(currentUser
-      ? [
-          { id: 'profile' as NavTab, label: 'Profile', icon: UserIcon },
-          { id: 'settings' as NavTab, label: 'Settings', icon: Settings },
-        ]
-      : []),
+    ...(currentUser ? [{ id: 'profile' as NavTab, label: 'Profile', icon: UserIcon }] : []),
+    { id: 'settings', label: 'Settings', icon: Settings },
     { id: 'admin', label: 'Admin', icon: Shield },
   ];
 
@@ -95,14 +121,16 @@ function OrbisShell() {
   };
 
   return (
-    <div className="min-h-screen pb-16 md:pb-0">
-      {/* Compact Mobile Top Header (52px) */}
-      <header className="sticky top-0 z-40 flex h-[52px] items-center justify-between border-b border-zinc-200/80 bg-white/90 px-3 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/90 md:hidden">
+    <div className="min-h-screen pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+      {/* Compact Mobile Top Header (52px + top safe area) */}
+      <header className="sticky top-0 z-40 flex min-h-[52px] items-center justify-between border-b border-zinc-200/80 bg-white/90 px-3 pt-[env(safe-area-inset-top)] backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/90 md:hidden">
         <button type="button" onClick={() => setActiveTab('feed')} className="shrink-0">
           <OrbisLogo size={26} />
         </button>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
+          <PWAInstallButton variant="header" />
+
           <button
             type="button"
             onClick={() => setActiveTab('notifications')}
@@ -111,7 +139,7 @@ function OrbisShell() {
           >
             <Bell className="h-5 w-5" />
             {unreadNotifications > 0 && (
-              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-600" />
+              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-rose-600" />
             )}
           </button>
 
@@ -122,6 +150,15 @@ function OrbisShell() {
             className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-600 dark:text-zinc-300"
           >
             <Sparkles className="h-5 w-5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('settings')}
+            aria-label="Settings"
+            className="flex h-11 w-11 items-center justify-center rounded-xl text-zinc-600 dark:text-zinc-300"
+          >
+            <Settings className="h-5 w-5" />
           </button>
 
           <button
@@ -153,6 +190,8 @@ function OrbisShell() {
           )}
         </div>
       </header>
+
+      <OfflineIndicator />
 
       {/* Desktop 3-Column Container */}
       <div className="mx-auto flex max-w-7xl justify-center gap-6 px-3 sm:px-6">
@@ -198,6 +237,8 @@ function OrbisShell() {
           </div>
 
           <div className="space-y-2.5 pt-3 border-t border-zinc-200/70 dark:border-zinc-800/70">
+            <PWAInstallButton variant="sidebar" />
+
             <button
               type="button"
               onClick={toggleTheme}
@@ -248,16 +289,19 @@ function OrbisShell() {
 
         {/* Main Active View */}
         <main className="w-full max-w-2xl py-4 md:py-6 min-w-0">
-          {activeTab === 'feed' && <FeedView />}
-          {activeTab === 'reels' && <ReelsView />}
-          {activeTab === 'explore' && <ExploreView />}
-          {activeTab === 'communities' && <CommunitiesView />}
-          {activeTab === 'messages' && <MessagesView />}
-          {activeTab === 'notifications' && <NotificationsView />}
-          {activeTab === 'creator' && <CreatorStudioView />}
-          {activeTab === 'admin' && <AdminView />}
-          {activeTab === 'profile' && <ProfileView />}
-          {activeTab === 'settings' && <SettingsView />}
+          <PWAInstallButton variant="banner" />
+          <Suspense fallback={<ViewLoader />}>
+            {activeTab === 'feed' && <FeedView />}
+            {activeTab === 'reels' && <ReelsView />}
+            {activeTab === 'explore' && <ExploreView />}
+            {activeTab === 'communities' && <CommunitiesView />}
+            {activeTab === 'messages' && <MessagesView />}
+            {activeTab === 'notifications' && <NotificationsView />}
+            {activeTab === 'creator' && <CreatorStudioView />}
+            {activeTab === 'admin' && <AdminView />}
+            {activeTab === 'profile' && <ProfileView />}
+            {activeTab === 'settings' && <SettingsView />}
+          </Suspense>
         </main>
 
         {/* Right Discovery Rail (Desktop) */}
@@ -354,8 +398,8 @@ function OrbisShell() {
         </aside>
       </div>
 
-      {/* Mobile Bottom Navigation Bar (56px, >= 44px touch targets) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 grid h-14 grid-cols-5 items-center border-t border-zinc-200 bg-white/95 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 md:hidden">
+      {/* Mobile Bottom Navigation Bar (56px + bottom safe area, >= 44px touch targets) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 grid min-h-14 grid-cols-5 items-center border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 md:hidden">
         {mobileTabs.map((item) => {
           const Icon = item.icon;
           const active = activeTab === item.id;

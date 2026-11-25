@@ -8,9 +8,16 @@
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   }
 
+  html {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
+  }
+
   body {
     font-family: var(--font-sans);
     @apply bg-zinc-50 text-zinc-900 antialiased transition-colors duration-200 dark:bg-zinc-950 dark:text-zinc-100;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
   h1, h2, h3, h4, .font-display {

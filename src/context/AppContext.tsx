@@ -64,18 +64,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const wsRef = useRef<WebSocket | null>(null);
   const listenersRef = useRef<Set<WsListener>>(new Set());
 
+  const syncThemeMeta = (mode: 'light' | 'dark') => {
+    document.documentElement.classList.toggle('dark', mode === 'dark');
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute('content', mode === 'dark' ? '#09090b' : '#fafafa');
+    }
+  };
+
   useEffect(() => {
     const saved = window.localStorage.getItem('orbis-theme') as 'light' | 'dark' | null;
     const initial = saved === 'light' ? 'light' : 'dark';
     setTheme(initial);
-    document.documentElement.classList.toggle('dark', initial === 'dark');
+    syncThemeMeta(initial);
   }, []);
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
     window.localStorage.setItem('orbis-theme', next);
-    document.documentElement.classList.toggle('dark', next === 'dark');
+    syncThemeMeta(next);
   };
 
   const refreshUnreadCounts = useCallback(async () => {
