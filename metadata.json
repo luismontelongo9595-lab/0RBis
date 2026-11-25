@@ -1,0 +1,6 @@
+{
+  "name": "Orbis",
+  "description": "Social platform uniting visual stories, vertical reels, communities, real-time messaging, marketplace, and creator monetization.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
